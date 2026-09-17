@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assistant biblique</title>
+<meta name="description" content="Une IA qui répond aux questions sur la Bible en ne puisant que dans aelf.org et sanctimaps.fr.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+<style>
+  :root {
+    --fond: #fbfaf7;
+    --carte: #ffffff;
+    --texte: #23201b;
+    --doux: #6b6459;
+    --trait: #e4ded2;
+    --accent: #7a5c2e;
+    --accent-clair: #f3ecdf;
+    --alerte-fond: #fdf6e8;
+    --alerte-trait: #c9a227;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fond: #16150f;
+      --carte: #201e17;
+      --texte: #ece7dc;
+      --doux: #a89f8f;
+      --trait: #37332a;
+      --accent: #d8b878;
+      --accent-clair: #2b2720;
+      --alerte-fond: #2a2314;
+      --alerte-trait: #a88a2e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0 16px 80px;
+    background: var(--fond);
+    color: var(--texte);
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-text-size-adjust: 100%;
+  }
+  .contenu { max-width: 720px; margin: 0 auto; }
+  header { padding: 56px 0 28px; border-bottom: 1px solid var(--trait); }
+  h1 { margin: 0 0 10px; font-size: 2.1rem; letter-spacing: -0.02em; line-height: 1.15; }
+  .chapeau { margin: 0; font-size: 1.12rem; color: var(--doux); }
+  h2 {
+    font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--doux); margin: 44px 0 14px; font-weight: 600;
+  }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); }
+  ul.capacites { list-style: none; margin: 0; padding: 0; }
+  ul.capacites li {
+    background: var(--carte); border: 1px solid var(--trait); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 10px;
+  }
+  ul.capacites strong { display: block; margin-bottom: 4px; }
+  ul.capacites span { color: var(--doux); font-size: 0.95rem; }
+  .exemple { font-style: italic; color: var(--doux); }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 14px; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--trait); vertical-align: top; }
+  th { color: var(--doux); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.88em; background: var(--accent-clair);
+    padding: 2px 6px; border-radius: 5px;
+  }
+  .encart {
+    background: var(--alerte-fond);
+    border: 1px solid var(--alerte-trait);
+    border-left-width: 4px;
+    border-radius: 0 12px 12px 0;
+    padding: 18px 20px;
+    margin: 0 0 18px;
+  }
+  .encart h3 { margin: 0 0 8px; font-size: 1.05rem; }
+  .encart p:last-child { margin-bottom: 0; }
+  pre {
+    background: var(--carte); border: 1px solid var(--trait); border-radius: 10px;
+    padding: 14px 16px; overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.83rem; line-height: 1.7; margin: 0 0 14px;
+  }
+  pre code { background: none; padding: 0; }
+  .commentaire { color: var(--doux); }
+  .boutons { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+  .bouton {
+    display: inline-block; background: var(--accent); color: var(--fond);
+    text-decoration: none; padding: 11px 20px; border-radius: 9px;
+    font-size: 0.95rem; font-family: system-ui, -apple-system, sans-serif;
+  }
+  .bouton.secondaire {
+    background: transparent; color: var(--accent); border: 1px solid var(--trait);
+  }
+  footer {
+    margin-top: 52px; padding-top: 22px; border-top: 1px solid var(--trait);
+    color: var(--doux); font-size: 0.88rem;
+  }
+</style>
+</head>
+<body>
+<div class="contenu">
+
+<header>
+  <h1>Assistant biblique</h1>
+  <p class="chapeau">
+    Une IA qui répond aux questions sur la Bible sans jamais inventer :
+    chaque phrase qu'elle avance vient d'un texte qu'elle est allée lire.
+  </p>
+</header>
+
+<h2>Ce qu'elle sait faire</h2>
+<ul class="capacites">
+  <li>
+    <strong>Reconnaître une scène biblique sur une image</strong>
+    <span>Elle relève les indices — les personnages, les gestes, les objets —,
+    formule des hypothèses, puis les vérifie dans le texte avant de conclure.</span>
+  </li>
+  <li>
+    <strong>Raconter l'histoire d'un prophète</strong>
+    <span class="exemple">« Raconte-moi l'histoire du prophète Jonas. »</span>
+  </li>
+  <li>
+    <strong>Répondre à une question de fond</strong>
+    <span class="exemple">« Que dit le Nouveau Testament sur la tromperie ? »</span>
+  </li>
+  <li>
+    <strong>Donner les lectures de la messe</strong>
+    <span>Pour aujourd'hui ou pour n'importe quelle date, dans la zone
+    liturgique de votre choix.</span>
+  </li>
+</ul>
+
+<h2>Ses deux seules sources</h2>
+<table>
+  <tr><th>Source</th><th>Pour</th></tr>
+  <tr>
+    <td><a href="https://www.aelf.org" target="_blank" rel="noopener">aelf.org</a></td>
+    <td>Le texte biblique dans la traduction liturgique officielle, et les lectures de la messe</td>
+  </tr>
+  <tr>
+    <td><a href="https://sanctimaps.fr" target="_blank" rel="noopener">sanctimaps.fr</a></td>
+    <td>Les questions sur les saints</td>
+  </tr>
+</table>
+<p>
+  Ce n'est pas une consigne donnée à l'IA, c'est une contrainte inscrite dans le
+  programme : elle n'a aucun accès au web, seulement cinq outils branchés sur
+  ces deux sites, et chaque requête vérifie le domaine avant de partir. Si elle
+  ne trouve pas, elle le dit — elle ne comble jamais un vide de mémoire.
+</p>
+
+<h2>Pour l'utiliser</h2>
+
+<div class="encart">
+  <h3>Cette page ne peut pas être l'assistant</h3>
+  <p>
+    Elle est hébergée par GitHub&nbsp;Pages, qui ne sert que des fichiers —
+    il n'y a personne derrière pour travailler. Et surtout : l'assistant a
+    besoin d'une clé d'accès à l'IA, qui serait lisible par tous les visiteurs
+    si elle était placée dans une page web. Il lui faut donc un serveur, même
+    tout petit.
+  </p>
+</div>
+
+<p>Sur votre ordinateur, quatre commandes suffisent :</p>
+<pre><code>git clone https://github.com/sanctimaps-gif/Bible.git
+cd Bible
+pip install -r requirements.txt
+<span class="commentaire"># collez votre clé API dans un fichier .env, puis :</span>
+uvicorn app.api:application</code></pre>
+<p>L'assistant répond alors sur <code>http://127.0.0.1:8000</code>.</p>
+
+<p>
+  Pour une adresse publique, l'application est livrée avec son image Docker et
+  fonctionne chez n'importe quel hébergeur qui accepte Docker. Le dépôt explique
+  la marche à suivre.
+</p>
+
+<div class="boutons">
+  <a class="bouton" href="https://github.com/sanctimaps-gif/Bible">Voir le dépôt</a>
+  <a class="bouton secondaire" href="https://github.com/sanctimaps-gif/Bible#installation">Guide d'installation</a>
+</div>
+
+<footer>
+  <p>
+    Le texte biblique et les lectures proviennent de l'<strong>AELF</strong>
+    (Association épiscopale liturgique pour les pays francophones), les notices
+    de saints de <strong>sanctimaps.fr</strong>. Ce projet ne redistribue aucun
+    de ces textes : il les consulte.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

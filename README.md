@@ -126,6 +126,53 @@ Les événements SSE portent un champ `type` : `outil` (une recherche commence),
 
 ---
 
+## Mise en ligne
+
+### Pourquoi GitHub Pages ne peut pas héberger l'assistant
+
+L'adresse `sanctimaps-gif.github.io/Bible` affiche la page de présentation
+(`index.html`), et c'est tout ce qu'elle peut faire. Deux raisons, dont la
+seconde est rédhibitoire :
+
+1. GitHub Pages ne sert que des fichiers statiques — il n'exécute aucun
+   programme Python.
+2. **Surtout : une page web ne peut pas garder un secret.** La clé API
+   Anthropic serait lisible par n'importe quel visiteur dans le code source, et
+   facturée sur votre compte. Réécrire l'assistant en JavaScript ne changerait
+   rien à ce problème.
+
+Il faut donc un serveur, si modeste soit-il. Le dépôt reste la source de
+vérité ; seule l'exécution se passe ailleurs.
+
+### Avec Docker
+
+```bash
+docker build -t assistant-biblique .
+docker run -p 8000:8000 \
+  -e ANTHROPIC_API_KEY=sk-ant-... \
+  -v assistant-donnees:/données \
+  assistant-biblique
+```
+
+Le volume `assistant-donnees` conserve le corpus biblique. Sans lui, il est
+retéléchargé depuis AELF à chaque redémarrage — une dizaine de minutes, et
+autant de charge inutile pour AELF.
+
+L'image tourne telle quelle chez tout hébergeur acceptant Docker : Render,
+Railway, Fly.io, Hugging Face Spaces, Scaleway, ou un VPS avec nginx en façade.
+La plupart imposent le port par la variable `PORT`, que l'image respecte.
+
+### Variables à définir en production
+
+| Variable | Rôle |
+|---|---|
+| `ANTHROPIC_API_KEY` | Obligatoire. À passer en secret, jamais dans le dépôt. |
+| `PORT` | Port d'écoute, souvent imposé par l'hébergeur. |
+| `BIBLE_DONNEES` | Emplacement du corpus (`/données` dans l'image). |
+| `BIBLE_INGERER_AU_DEMARRAGE` | `0` pour ne pas télécharger le corpus au premier lancement. |
+
+---
+
 ## Ce qu'on a « appris » à l'IA
 
 Tout tient dans `app/ia/prompts.py`, en trois leçons.
@@ -172,6 +219,9 @@ app/
 │   └── agent.py           Boucle question → recherches → réponse
 ├── api.py                 FastAPI + SSE
 └── cli.py                 Ligne de commande
+
+index.html                 Page de présentation servie par GitHub Pages
+Dockerfile, entrypoint.sh  Mise en ligne
 ```
 
 Le modèle par défaut est **Claude Opus 5** (`claude-opus-5`), en raisonnement
