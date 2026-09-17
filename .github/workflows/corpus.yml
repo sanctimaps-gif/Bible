@@ -15,6 +15,11 @@ on:
         description: "Livres à ingérer (codes séparés par des espaces). Vide = tout le canon."
         required: false
         default: ""
+      forcer:
+        description: "Retélécharger même les chapitres déjà présents (après correction de l'extraction)."
+        type: boolean
+        required: false
+        default: false
   schedule:
     # Tous les jours à 3 h 10 UTC : rafraîchit les lectures de la semaine.
     - cron: "10 3 * * *"
@@ -46,11 +51,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/bible
-          key: corpus-aelf-v1-${{ github.run_id }}
-          restore-keys: corpus-aelf-v1-
+          # Le numéro de version est à incrémenter quand l'extraction change :
+          # il écarte un corpus produit par l'ancienne version du code.
+          key: corpus-aelf-v2-${{ github.run_id }}
+          restore-keys: corpus-aelf-v2-
 
-      - name: Télécharger les chapitres manquants depuis AELF
-        run: python scripts/ingerer_bible.py ${{ inputs.livres }}
+      - name: Télécharger les chapitres depuis AELF
+        run: |
+          python scripts/ingerer_bible.py \
+            ${{ inputs.forcer == true && '--forcer' || '' }} \
+            ${{ inputs.livres }}
 
       - name: Préparer les fichiers lus par la page
         # Les lectures des sept prochains jours, pour que la page reste juste
