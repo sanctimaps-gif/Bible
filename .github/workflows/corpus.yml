@@ -1,0 +1,87 @@
+name: Corpus AELF
+
+# Télécharge le texte depuis AELF et le dépose dans site/donnees/, que la page
+# lit directement. C'est GitHub qui fait ce travail — pas le visiteur, pas nous.
+#
+# La première exécution est longue (1 334 chapitres, une demi-seconde entre
+# chaque requête par courtoisie pour AELF). Les suivantes ne font que rafraîchir
+# les lectures du jour : le corpus déjà téléchargé est conservé d'un jour sur
+# l'autre par le cache.
+
+on:
+  workflow_dispatch:
+    inputs:
+      livres:
+        description: "Livres à ingérer (codes séparés par des espaces). Vide = tout le canon."
+        required: false
+        default: ""
+  schedule:
+    # Tous les jours à 3 h 10 UTC : rafraîchit les lectures de la semaine.
+    - cron: "10 3 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: corpus
+  cancel-in-progress: false
+
+jobs:
+  corpus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Restaurer le corpus déjà téléchargé
+        uses: actions/cache@v4
+        with:
+          path: data/bible
+          key: corpus-aelf-v1-${{ github.run_id }}
+          restore-keys: corpus-aelf-v1-
+
+      - name: Télécharger les chapitres manquants depuis AELF
+        run: python scripts/ingerer_bible.py ${{ inputs.livres }}
+
+      - name: Préparer les fichiers lus par la page
+        # Les lectures des sept prochains jours, pour que la page reste juste
+        # même si l'exécution quotidienne saute une fois.
+        run: python scripts/exporter_site.py --messes 7
+
+      - name: Publier les données
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/donnees
+          if git diff --cached --quiet; then
+            echo "Rien de nouveau."
+            exit 0
+          fi
+          git commit -m "Corpus AELF : mise à jour automatique
+
+          Données téléchargées depuis aelf.org par le workflow « Corpus AELF »."
+          # Un autre commit a pu arriver entre-temps : on se replace dessus.
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Récapitulatif
+        if: always()
+        run: |
+          echo "### Corpus AELF" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -d site/donnees ]; then
+            echo "- livres exportés : $(ls site/donnees/livres 2>/dev/null | wc -l)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- messes exportées : $(ls site/donnees/messe 2>/dev/null | wc -l)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- poids total : $(du -sh site/donnees 2>/dev/null | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Aucune donnée produite." >> "$GITHUB_STEP_SUMMARY"
+          fi
