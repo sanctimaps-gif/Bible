@@ -1,0 +1,44 @@
+name: Diagnostic AELF
+
+# Décrit la structure des pages d'AELF. Utile quand l'extraction des versets
+# rend un résultat douteux : le développement n'a pas toujours accès à aelf.org,
+# GitHub si.
+
+on:
+  workflow_dispatch:
+    inputs:
+      chemins:
+        description: "Chemins AELF à décrire, séparés par des espaces."
+        required: false
+        default: "bible/Jon/1 bible/Ab/1 bible/Ps/150"
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Décrire les pages
+        run: |
+          python scripts/diagnostic_aelf.py ${{ inputs.chemins }} | tee rapport.txt
+
+      - name: Publier le rapport
+        if: always()
+        run: |
+          echo '### Structure des pages AELF' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          head -c 60000 rapport.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rapport-aelf
+          path: rapport.txt
