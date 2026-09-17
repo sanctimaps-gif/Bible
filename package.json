@@ -1,0 +1,19 @@
+{
+  "name": "assistant-biblique",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interface sans serveur de l'assistant biblique, servie par GitHub Pages.",
+  "scripts": {
+    "test": "node tests/e2e/parcours.mjs",
+    "capture": "node tests/e2e/capture.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanctimaps-gif/Bible.git"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}

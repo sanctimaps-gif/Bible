@@ -297,3 +297,23 @@ def test_codes_uniques():
 def test_resolution_des_noms_de_livres(graphie, attendu):
     livre = trouver_livre(graphie)
     assert (livre.code if livre else None) == attendu
+
+
+def test_table_js_a_jour():
+    """`site/livres.js` doit rester en phase avec `app/corpus/livres.py`.
+
+    Les deux versions — serveur et navigateur — partagent la même table ; on
+    l'engendre plutôt que de la tenir à jour deux fois.
+    """
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    racine = Path(__file__).resolve().parent.parent
+    resultat = subprocess.run(
+        [sys.executable, "scripts/exporter_livres.py", "--verifier"],
+        cwd=racine,
+        capture_output=True,
+        text=True,
+    )
+    assert resultat.returncode == 0, resultat.stderr or resultat.stdout

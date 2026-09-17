@@ -21,6 +21,38 @@ Elle sait faire les trois choses demandées :
 
 ---
 
+## Deux versions
+
+Le projet existe sous deux formes, qui partagent la même méthode, le même style
+de rédaction et la même table des livres.
+
+| | **Version page** (`index.html`, `site/`) | **Version serveur** (`app/`) |
+|---|---|---|
+| Où elle tourne | GitHub Pages, sans aucun serveur | Votre machine, ou un hébergeur |
+| Clé API | fournie par le visiteur, gardée dans son navigateur | côté serveur, invisible du public |
+| Lecture d'AELF | par les serveurs d'Anthropic (`web_fetch`) | par le programme lui-même |
+| Recherche thématique | le modèle propose des passages, puis les vérifie | index plein texte sur tout le corpus |
+| Mise en route | rien à installer | quatre commandes |
+
+**La version page** est à l'adresse
+<https://sanctimaps-gif.github.io/Bible/>. Elle fonctionne sans rien installer :
+le visiteur colle sa propre clé Anthropic, qui reste dans son navigateur.
+
+Pourquoi la clé du visiteur, et pas la vôtre ? Parce qu'une page statique ne
+peut pas garder un secret : une clé placée dans le code serait lisible par tous
+et facturée sur votre compte. La seule clé qui puisse y figurer sans danger est
+celle de la personne qui s'en sert.
+
+Et pourquoi le navigateur peut-il lire AELF, alors que les règles inter-domaines
+l'interdisent normalement ? Parce qu'il ne le lit pas lui-même : les outils
+`web_fetch` et `web_search` s'exécutent sur les serveurs d'Anthropic, bridés aux
+deux domaines autorisés. La page ne fait que demander.
+
+**La version serveur** reste préférable pour un usage régulier : pas de clé à
+fournir, et surtout une vraie recherche plein texte sur l'ensemble du corpus.
+
+---
+
 ## Comment la contrainte « une seule source » est tenue
 
 Ce n'est pas une consigne polie dans un prompt : c'est une propriété du code.
@@ -128,21 +160,15 @@ Les événements SSE portent un champ `type` : `outil` (une recherche commence),
 
 ## Mise en ligne
 
-### Pourquoi GitHub Pages ne peut pas héberger l'assistant
+### GitHub Pages
 
-L'adresse `sanctimaps-gif.github.io/Bible` affiche la page de présentation
-(`index.html`), et c'est tout ce qu'elle peut faire. Deux raisons, dont la
-seconde est rédhibitoire :
+Rien à faire : `index.html` et `site/` sont servis tels quels depuis la branche.
+Le fichier `.nojekyll` empêche GitHub de retransformer le README en page.
 
-1. GitHub Pages ne sert que des fichiers statiques — il n'exécute aucun
-   programme Python.
-2. **Surtout : une page web ne peut pas garder un secret.** La clé API
-   Anthropic serait lisible par n'importe quel visiteur dans le code source, et
-   facturée sur votre compte. Réécrire l'assistant en JavaScript ne changerait
-   rien à ce problème.
-
-Il faut donc un serveur, si modeste soit-il. Le dépôt reste la source de
-vérité ; seule l'exécution se passe ailleurs.
+Ce qui ne peut pas y vivre, en revanche, c'est une clé API : elle serait lisible
+par tous les visiteurs. D'où le fonctionnement décrit plus haut — chacun apporte
+la sienne. Si vous voulez offrir l'assistant sans demander de clé, il faut un
+serveur : c'est l'objet de la section suivante.
 
 ### Avec Docker
 
@@ -220,8 +246,16 @@ app/
 ├── api.py                 FastAPI + SSE
 └── cli.py                 Ligne de commande
 
-index.html                 Page de présentation servie par GitHub Pages
-Dockerfile, entrypoint.sh  Mise en ligne
+index.html                 La page servie par GitHub Pages
+site/
+├── livres.js              Table des livres — engendrée depuis livres.py
+├── prompt.js              Le même prompt système, adapté aux outils du navigateur
+├── claude.js              Appel de l'API et boucle d'outils, côté navigateur
+├── app.js                 Interface
+└── style.css
+
+Dockerfile, entrypoint.sh  Mise en ligne de la version serveur
+scripts/exporter_livres.py Régénère site/livres.js
 ```
 
 Le modèle par défaut est **Claude Opus 5** (`claude-opus-5`), en raisonnement
@@ -236,13 +270,26 @@ pour diffuser en direct les recherches en cours et borner le nombre de tours
 ## Tests
 
 ```bash
-pytest
+pytest        # version serveur — 105 tests
+npm test      # version page — 7 parcours dans un vrai navigateur
 ```
 
-104 tests, aucun accès réseau : les réponses d'AELF, de sanctimaps et de l'API
-Anthropic sont toutes simulées. Ils couvrent l'analyse des références, l'index
-de recherche, l'extraction du HTML liturgique, le refus des domaines non
-autorisés, la boucle de dialogue et les routes HTTP.
+Aucun accès réseau : les réponses d'AELF, de sanctimaps et de l'API Anthropic
+sont toutes simulées, et aucune clé n'est nécessaire.
+
+Les tests Python couvrent l'analyse des références, l'index de recherche,
+l'extraction du HTML liturgique, le refus des domaines non autorisés, la boucle
+de dialogue et les routes HTTP.
+
+Les tests du navigateur chargent réellement `index.html` dans Chromium et
+interceptent les appels à `api.anthropic.com` pour y rejouer un flux
+d'événements identique à celui de l'API. Ils vérifient l'analyse du flux, la
+boucle d'outils, le renvoi des blocs de réflexion avec leur signature, l'envoi
+des images, les en-têtes et les messages d'erreur.
+
+```bash
+npm run capture   # relit le rendu en clair et en sombre, sans clé
+```
 
 ---
 
@@ -272,6 +319,19 @@ autorisés, la boucle de dialogue et les routes HTTP.
 * **Le cache est daté d'une semaine** (`BIBLE_CACHE_TTL`). Pour la messe du
   jour, c'est sans conséquence (une date = une page) ; réduisez-le si vous
   voulez suivre des corrections éditoriales d'AELF au plus près.
+* **La version page n'a pas été essayée contre l'API réelle**, faute de clé dans
+  l'environnement de développement. Tout ce qui pouvait l'être l'a été dans un
+  vrai navigateur, API simulée : analyse du flux, boucle d'outils, signatures,
+  images, en-têtes, erreurs. Ce qui reste à confirmer à la première question
+  posée avec une vraie clé, ce sont deux points de contrat côté API :
+  l'acceptation de l'en-tête d'accès navigateur, et le comportement exact de
+  `web_fetch` sur les adresses d'AELF. Si `web_fetch` refuse une adresse, le
+  modèle se rabat sur `web_search` — c'est prévu, mais la réponse sera moins
+  précise.
+* **La recherche thématique est plus faible dans la version page.** Sans index
+  local, le modèle propose des passages de mémoire puis les vérifie un par un.
+  C'est honnête — rien n'est cité sans avoir été lu — mais moins exhaustif que
+  le balayage BM25 de la version serveur.
 
 ---
 

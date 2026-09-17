@@ -6,7 +6,8 @@ on:
   pull_request:
 
 jobs:
-  tests:
+  python:
+    name: Version serveur
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,3 +24,25 @@ jobs:
         # Aucun accès réseau n'est requis : AELF, sanctimaps et l'API Anthropic
         # sont tous simulés.
         run: pytest
+
+  navigateur:
+    name: Page GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci || npm install
+
+      - name: Installer Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Parcours de bout en bout
+        # La page est chargée dans un vrai navigateur ; l'API Anthropic est
+        # simulée, aucune clé n'est nécessaire.
+        run: npm test

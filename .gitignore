@@ -10,3 +10,6 @@ venv/
 data/bible/
 data/cache/
 data/index/
+
+# Dépendances de test du navigateur
+node_modules/
