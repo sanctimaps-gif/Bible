@@ -297,7 +297,11 @@ def _extraire_versets(html: str) -> list[tuple[int, str]]:
 # « chapitre 2 »…). Sans cette exclusion, il est pris pour un verset, dont le
 # numéro est celui du chapitre courant — et il écrase alors le vrai verset.
 _ZONES_HORS_TEXTE = (
-    ".block-summary",
+    ".block-summary",       # sommaire de la colonne de gauche
+    ".container-toolbar",   # barre d'outils au-dessus du texte…
+    ".toolbar",
+    ".dropdown-menu",       # …et son menu déroulant, second sommaire
+    ".dropdown",
     "nav",
     "header",
     "footer",
@@ -307,6 +311,14 @@ _ZONES_HORS_TEXTE = (
     "script",
     "style",
 )
+
+# Garde-fou générique : quelle que soit la mise en page, une liste de renvois
+# « chapitre 1, chapitre 2, chapitre 3… » est un sommaire, jamais un verset.
+_MOTIF_SOMMAIRE = re.compile(r"chapitres?\s+\d+", re.IGNORECASE)
+
+
+def _est_un_sommaire(texte: str) -> bool:
+    return len(_MOTIF_SOMMAIRE.findall(texte)) >= 3
 
 # Zones de contenu, de la plus précise à la plus large. Les deux premières sont
 # celles qu'AELF emploie réellement pour le texte biblique.
@@ -403,9 +415,16 @@ def _detacher_numero(texte: str) -> tuple[int | None, str]:
 
 
 def _dedupliquer(versets: Iterable[tuple[int, str]]) -> list[tuple[int, str]]:
-    """Garde le premier texte rencontré pour chaque numéro, dans l'ordre de lecture."""
+    """Garde le premier texte rencontré pour chaque numéro, dans l'ordre de lecture.
+
+    Écarte au passage ce qui est manifestement un sommaire : AELF en publie un
+    par colonne et un par menu déroulant, et rien ne garantit qu'une prochaine
+    version n'en ajoutera pas un troisième.
+    """
     vus: dict[int, str] = {}
     for numero, texte in versets:
+        if _est_un_sommaire(texte):
+            continue
         if numero not in vus:
             vus[numero] = texte
     return sorted(vus.items())

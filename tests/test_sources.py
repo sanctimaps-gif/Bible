@@ -375,3 +375,60 @@ def test_les_menus_ne_polluent_pas_le_texte():
         (1, "Au commencement, Dieu créa le ciel et la terre."),
         (2, "La terre était informe et vide."),
     ]
+
+
+def test_le_menu_deroulant_des_chapitres_est_ecarte():
+    """Second sommaire : AELF répète la liste des chapitres dans un menu déroulant.
+
+    Il vit dans la barre d'outils, au-dessus du texte — donc à l'intérieur de la
+    zone de lecture. L'exclusion de `.block-summary` ne suffisait pas.
+    """
+    html = """
+    <body class="front_bible_chapter">
+      <div id="right-col" class="block-single-reading">
+        <div class="container-toolbar">
+          <div class="toolbar"><div class="clearfix">
+            <div class="dropdown selector">
+              <div id="menu3" class="dropdown-menu">
+                <ul>
+                  <li><a href="/bible/Jon/1">chapitre 1</a></li>
+                  <li><a href="/bible/Jon/2">chapitre 2</a></li>
+                  <li><a href="/bible/Jon/3">chapitre 3</a></li>
+                  <li><a href="/bible/Jon/4">chapitre 4</a></li>
+                </ul>
+              </div>
+            </div>
+          </div></div>
+        </div>
+        <p><sup>1</sup>Parole du Seigneur adressée à Jonas.</p>
+        <p><sup>2</sup>Lève-toi, va à Ninive, la grande ville.</p>
+      </div>
+    </body>
+    """
+    versets = _extraire_versets(html)
+    assert versets == [
+        (1, "Parole du Seigneur adressée à Jonas."),
+        (2, "Lève-toi, va à Ninive, la grande ville."),
+    ]
+
+
+def test_un_sommaire_est_ecarte_meme_hors_des_zones_connues():
+    """Garde-fou : une liste de renvois « chapitre N » n'est jamais un verset.
+
+    Si AELF déplace son sommaire dans une balise que nous n'avons pas prévue,
+    le texte lui-même le trahit.
+    """
+    html = """
+    <div id="right-col" class="block-single-reading">
+      <div class="imprevu">
+        <p>1. chapitre 2 chapitre 3 chapitre 4 chapitre 5</p>
+      </div>
+      <p>1. Au commencement, Dieu créa le ciel et la terre.</p>
+      <p>2. La terre était informe et vide.</p>
+    </div>
+    """
+    versets = _extraire_versets(html)
+    assert versets == [
+        (1, "Au commencement, Dieu créa le ciel et la terre."),
+        (2, "La terre était informe et vide."),
+    ]
