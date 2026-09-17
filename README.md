@@ -331,20 +331,21 @@ npm run capture   # relit le rendu en clair et en sombre, sans clé
 
 ## Limites connues, à lire avant de déployer
 
-* **Les sélecteurs HTML n'ont pas pu être validés contre le site réel.**
-  L'environnement où ce code a été écrit n'avait pas accès à `aelf.org` ni à
-  `sanctimaps.fr` (bloqués par la politique réseau). L'extraction des versets
-  (`_extraire_versets`) essaie donc **trois stratégies** successives et échoue
-  proprement — `SourceIndisponible`, jamais un texte mutilé — si aucune ne
-  marche. Premier test à faire après clonage :
-
-  ```bash
-  python -c "from app.sources.aelf import ClientAelf; print(ClientAelf().chapitre('Jon', 1).texte)"
-  ```
-
-  Si la sortie est vide ou l'erreur explicite, adaptez `_extraire_versets` dans
-  `app/sources/aelf.py` : c'est le seul endroit à corriger. Même chose pour
-  `_texte_principal` dans `app/sources/sanctimaps.py`.
+* **L'extraction du texte a été vérifiée contre le site réel** : le corpus a
+  été téléchargé par GitHub Actions, puis relu. Le texte d'AELF vit dans
+  `div#right-col.block-single-reading` ; le sommaire des chapitres, dans
+  `div.block-summary`, était d'abord pris pour un verset — c'est corrigé et
+  couvert par deux tests. Si AELF change sa mise en page, `_extraire_versets`
+  dans `app/sources/aelf.py` est le seul endroit à reprendre, et le workflow
+  **Diagnostic AELF** décrit la nouvelle structure depuis GitHub.
+* **Trois chapitres sur 1 334 manquent** à l'appel chez AELF, aux endroits où
+  la numérotation liturgique diverge : les psaumes 9 et 113 (que les
+  numérotations hébraïque et grecque découpent différemment) et Baruch 6 (la
+  lettre de Jérémie). Le livre d'Abdias n'est pas servi sous le code `Ab`. Ces
+  livres apparaissent simplement incomplets dans la liste : la page n'affiche
+  que ce qu'elle a.
+* **L'extraction de sanctimaps.fr (`_texte_principal`) n'a pas été vérifiée**
+  contre le site réel : elle ne sert que dans les versions à IA.
 * **Les codes de livres** (`Gn`, `Rm`, `1Co`…) suivent les abréviations
   liturgiques françaises usuelles. Si AELF en emploie une autre pour un livre,
   corrigez le champ `code` dans `app/corpus/livres.py`.
