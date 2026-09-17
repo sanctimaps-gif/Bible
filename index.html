@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Assistant biblique</title>
-<meta name="description" content="Une IA qui répond aux questions sur la Bible en ne puisant que dans aelf.org et sanctimaps.fr.">
+<title>La Bible — texte liturgique AELF</title>
+<meta name="description" content="Lire la Bible, chercher dans le texte, suivre les lectures de la messe. Texte de l'AELF, sans compte ni installation.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
 <link rel="stylesheet" href="site/style.css">
 </head>
@@ -12,132 +12,104 @@
 
 <header>
   <div class="contenu">
-    <h1>Assistant biblique</h1>
+    <h1>La Bible</h1>
     <p class="chapeau">
-      Il répond sans jamais inventer : chaque phrase qu'il avance vient d'un
-      texte qu'il est allé lire sur
-      <a href="https://www.aelf.org" target="_blank" rel="noopener">aelf.org</a>
-      — ou sur
-      <a href="https://sanctimaps.fr" target="_blank" rel="noopener">sanctimaps.fr</a>
-      pour les saints.
+      Traduction liturgique de l'<a href="https://www.aelf.org" target="_blank" rel="noopener">AELF</a>.
+      Rien à installer, rien à créer : ouvrez et lisez.
     </p>
   </div>
+  <nav class="contenu onglets" role="tablist">
+    <button type="button" class="onglet actif" data-vue="messe" role="tab">Aujourd'hui</button>
+    <button type="button" class="onglet" data-vue="recherche" role="tab">Chercher</button>
+    <button type="button" class="onglet" data-vue="lire" role="tab">Lire</button>
+  </nav>
 </header>
 
-<!-- ------------------------------------------------------------------ -->
-<!-- Saisie de la clé                                                    -->
-<!-- ------------------------------------------------------------------ -->
+<!-- =================== Lectures du jour =================== -->
 
-<section id="acces-cle" class="contenu" hidden>
-  <div class="encart">
-    <h2>Votre clé d'accès</h2>
-    <p>
-      Cette page n'a pas de serveur : c'est votre navigateur qui parle
-      directement à l'IA. Il lui faut donc <strong>votre</strong> clé Anthropic.
-    </p>
-    <p class="fine">
-      Elle reste dans votre navigateur, sur cet appareil. Elle n'est envoyée
-      qu'à <code>api.anthropic.com</code>, jamais à GitHub, jamais à personne
-      d'autre — et elle ne figure nulle part dans le code de cette page, que
-      vous pouvez vérifier.
-    </p>
-    <form id="formulaire-cle">
-      <input
-        type="password"
-        id="champ-cle"
-        placeholder="sk-ant-…"
-        autocomplete="off"
-        spellcheck="false"
-        required>
-      <button type="submit">Commencer</button>
-    </form>
-    <p class="fine">
-      Pas encore de clé ? Elle se crée en deux minutes sur
-      <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>.
-      Les questions sont facturées à l'usage, quelques centimes chacune.
-    </p>
+<section id="vue-messe" class="vue contenu">
+  <div class="barre-jour">
+    <button type="button" id="jour-precedent" aria-label="Jour précédent">‹</button>
+    <div>
+      <h2 id="messe-titre">Lectures du jour</h2>
+      <p id="messe-date" class="fine"></p>
+    </div>
+    <button type="button" id="jour-suivant" aria-label="Jour suivant">›</button>
   </div>
+  <div id="messe-contenu"><p class="patiente">Chargement…</p></div>
 </section>
 
-<!-- ------------------------------------------------------------------ -->
-<!-- L'assistant                                                         -->
-<!-- ------------------------------------------------------------------ -->
+<!-- =================== Recherche =================== -->
 
-<div id="atelier" hidden>
-
-  <main id="conversation" class="contenu" aria-live="polite"></main>
-
-  <section class="contenu" id="exemples">
-    <h2>Quelques questions pour commencer</h2>
-    <ul>
-      <li><button type="button" class="exemple">Raconte-moi l'histoire du prophète Jonas.</button></li>
-      <li><button type="button" class="exemple">Que dit le Nouveau Testament sur la tromperie ?</button></li>
-      <li><button type="button" class="exemple">Quelles sont les lectures de la messe aujourd'hui ?</button></li>
-      <li><button type="button" class="exemple">Qui est saint Martin de Tours ?</button></li>
-    </ul>
-    <p class="astuce">
-      Vous pouvez aussi joindre la photo d'une scène biblique — un vitrail, un
-      tableau, une enluminure : elle sera identifiée à partir du texte.
-    </p>
-  </section>
-
-  <form id="formulaire">
-    <div class="apercu contenu" id="apercu" hidden>
-      <img id="apercu-image" alt="Image jointe">
-      <button type="button" id="retirer-image" aria-label="Retirer l'image">×</button>
-    </div>
-    <div class="ligne">
-      <label class="joindre" for="image" title="Joindre une image">
-        <input type="file" id="image" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
-        <span aria-hidden="true">🖼</span>
-        <span class="sr">Joindre une image</span>
-      </label>
-      <textarea id="question" rows="1" placeholder="Posez votre question…" required></textarea>
-      <button type="submit" id="envoyer">Envoyer</button>
-    </div>
-    <p class="pied-formulaire contenu">
-      <span id="modele"></span> ·
-      sources limitées à aelf.org et sanctimaps.fr ·
-      <button type="button" id="oublier-cle" class="lien-bouton" hidden>oublier ma clé</button>
-    </p>
+<section id="vue-recherche" class="vue contenu" hidden>
+  <form id="formulaire-recherche">
+    <input
+      type="search"
+      id="champ-recherche"
+      placeholder="mensonge, berger, pardon…"
+      autocomplete="off"
+      enterkeyhint="search">
+    <button type="submit">Chercher</button>
   </form>
 
-</div>
+  <div class="filtres">
+    <label><input type="radio" name="testament" value="" checked> Toute la Bible</label>
+    <label><input type="radio" name="testament" value="ancien"> Ancien Testament</label>
+    <label><input type="radio" name="testament" value="nouveau"> Nouveau Testament</label>
+  </div>
 
-<!-- ------------------------------------------------------------------ -->
-<!-- Présentation                                                        -->
-<!-- ------------------------------------------------------------------ -->
-
-<section class="contenu presentation">
-  <h2>Comment il travaille</h2>
-  <p>
-    Il n'a pas le droit de répondre de mémoire. Sa mémoire lui sert à savoir
-    <em>où chercher</em> — quel livre, quel chapitre —, puis il va lire la page
-    et cite ce qu'elle dit. S'il ne trouve pas, il le dit.
-  </p>
-  <p>
-    Ce n'est pas une simple consigne : ses outils ne peuvent atteindre que
-    <code>aelf.org</code> et <code>sanctimaps.fr</code>, et cette restriction
-    est appliquée du côté d'Anthropic, hors d'atteinte de cette page.
+  <p class="astuce">
+    La recherche porte sur les mots du texte, et sur leur famille : chercher
+    <em>tromperie</em> trouve aussi <em>tromper</em> et <em>trompeur</em>.
+    Pour un thème, essayez plusieurs mots — le vocabulaire de la traduction
+    liturgique n'est pas toujours celui de la question.
   </p>
 
-  <h2>Une version complète existe</h2>
-  <p>
-    Pour un usage régulier — sans avoir à fournir sa clé, avec la recherche
-    plein texte sur l'ensemble de la Bible — le dépôt contient une version
-    serveur, plus rapide et plus fouillée, qui s'installe en quatre commandes.
-  </p>
-  <p>
-    <a class="bouton" href="https://github.com/sanctimaps-gif/Bible">Voir le dépôt</a>
-  </p>
+  <div id="suggestions" class="suggestions">
+    <h3>Quelques pistes</h3>
+    <div class="pastilles">
+      <button type="button" class="pastille" data-recherche="mensonge">mensonge</button>
+      <button type="button" class="pastille" data-recherche="hypocrisie">hypocrisie</button>
+      <button type="button" class="pastille" data-recherche="pardon">pardon</button>
+      <button type="button" class="pastille" data-recherche="berger">berger</button>
+      <button type="button" class="pastille" data-recherche="alliance">alliance</button>
+      <button type="button" class="pastille" data-recherche="Jonas">Jonas</button>
+    </div>
+  </div>
 
-  <footer>
-    Le texte biblique et les lectures proviennent de l'<strong>AELF</strong>
-    (Association épiscopale liturgique pour les pays francophones), les notices
-    de saints de <strong>sanctimaps.fr</strong>. Ce projet ne redistribue aucun
-    de ces textes : il les consulte.
-  </footer>
+  <div id="resultats"></div>
 </section>
+
+<!-- =================== Lecture suivie =================== -->
+
+<section id="vue-lire" class="vue contenu" hidden>
+  <div class="selecteurs">
+    <label>
+      <span class="sr">Livre</span>
+      <select id="choix-livre"></select>
+    </label>
+    <label>
+      <span class="sr">Chapitre</span>
+      <select id="choix-chapitre"></select>
+    </label>
+  </div>
+  <div id="chapitre-contenu"><p class="patiente">Choisissez un livre.</p></div>
+</section>
+
+<!-- =================== Pied =================== -->
+
+<footer class="contenu">
+  <p id="etat-corpus" class="fine"></p>
+  <p class="fine">
+    Le texte biblique et les lectures proviennent de l'<strong>AELF</strong>
+    (Association épiscopale liturgique pour les pays francophones). Chaque
+    passage renvoie à sa page d'origine.
+  </p>
+  <p class="fine">
+    <a href="https://github.com/sanctimaps-gif/Bible">Code source</a> ·
+    <a href="assistant-ia.html">version avec assistant IA</a> (nécessite une clé)
+  </p>
+</footer>
 
 <script type="module" src="site/app.js"></script>
 </body>

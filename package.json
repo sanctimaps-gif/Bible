@@ -5,7 +5,9 @@
   "type": "module",
   "description": "Interface sans serveur de l'assistant biblique, servie par GitHub Pages.",
   "scripts": {
-    "test": "node tests/e2e/parcours.mjs",
+    "test": "node tests/e2e/parcours-statique.mjs && node tests/e2e/parcours.mjs",
+    "test:statique": "node tests/e2e/parcours-statique.mjs",
+    "test:ia": "node tests/e2e/parcours.mjs",
     "capture": "node tests/e2e/capture.mjs"
   },
   "repository": {

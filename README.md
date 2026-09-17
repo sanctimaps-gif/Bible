@@ -1,55 +1,78 @@
-# Assistant biblique
+# La Bible — texte liturgique AELF
 
-Une IA qui répond aux questions sur la Bible **en ne puisant que dans deux
-sources** :
+**<https://sanctimaps-gif.github.io/Bible/>**
 
-| Domaine | Sert à | Point d'entrée |
-|---|---|---|
-| `aelf.org` | Texte biblique (traduction liturgique) et lectures de la messe | <https://www.aelf.org/2026-09-17/romain/messe> |
-| `sanctimaps.fr` | Questions sur les saints | <https://sanctimaps.fr> |
+Lire la Bible, chercher dans le texte, suivre les lectures de la messe. Rien à
+installer, aucun compte, aucune clé, **aucune IA** : la page ouvre et fonctionne.
 
-Elle sait faire les trois choses demandées :
+Le texte est celui de l'**AELF** — la traduction liturgique officielle
+francophone.
 
-* **identifier une scène biblique à partir d'une image** — elle relève les
-  indices visuels, formule des hypothèses, puis les vérifie dans le texte
-  d'AELF avant de conclure ;
-* **raconter l'histoire d'un prophète ou d'un personnage** — appel, mission,
-  épisodes, postérité, en citant les passages ;
-* **répondre à une question thématique** (« que dit le Nouveau Testament sur la
-  tromperie ? ») — plusieurs recherches avec des vocabulaires différents, puis
-  une synthèse par idées.
+| | |
+|---|---|
+| **Aujourd'hui** | Les lectures de la messe : fête, première lecture, psaume, évangile |
+| **Chercher** | Recherche plein texte dans toute la Bible, par mot et par famille de mots |
+| **Lire** | N'importe quel livre, n'importe quel chapitre, verset par verset |
+
+Chaque passage renvoie à sa page d'origine sur aelf.org.
 
 ---
 
-## Deux versions
+## Comment cela peut marcher sans serveur
 
-Le projet existe sous deux formes, qui partagent la même méthode, le même style
-de rédaction et la même table des livres.
+GitHub Pages ne sait servir que des fichiers. La page n'a donc besoin de rien
+d'autre : **c'est GitHub lui-même qui télécharge le texte depuis AELF**, une
+fois, par un workflow (`.github/workflows/corpus.yml`), et le dépose dans
+`site/donnees/`. La page lit ensuite ses propres fichiers.
 
-| | **Version page** (`index.html`, `site/`) | **Version serveur** (`app/`) |
+Conséquences :
+
+* aucune requête ne part vers un autre domaine — un test le vérifie ;
+* pas de blocage inter-domaines, puisqu'il n'y a pas de domaine à traverser ;
+* la recherche s'exécute dans le navigateur, sur le corpus déjà chargé ;
+* les lectures du jour sont rafraîchies chaque nuit par le même workflow.
+
+La recherche est un BM25 adapté au français : elle trouve les mots **et leur
+famille**. Chercher *tromperie* remonte aussi *tromper*, *trompeur*, *trompée* —
+c'est ce qui permet de répondre à « que dit le Nouveau Testament sur la
+tromperie ? » en filtrant sur le Nouveau Testament.
+
+---
+
+## Ce que cette version ne fait pas
+
+Il faut le dire nettement : **elle ne reconnaît pas une scène biblique sur une
+image**, et elle ne rédige pas de synthèse. Ces deux choses demandent une IA.
+Sans IA, une question thématique rend **les passages eux-mêmes**, avec leurs
+références — plus vérifiable qu'un texte rédigé, mais ce n'est pas la même
+chose.
+
+Si vous voulez ces fonctions, le dépôt contient deux autres versions, décrites
+plus bas : une page qui demande sa clé au visiteur (`assistant-ia.html`) et une
+version serveur complète (`app/`).
+
+---
+
+## Les trois versions du projet
+
+| | **La Bible** (`index.html`) | **Assistant IA** (`assistant-ia.html`) | **Version serveur** (`app/`) |
+|---|---|---|---|
+| Où elle tourne | GitHub Pages | GitHub Pages | Votre machine ou un hébergeur |
+| IA | aucune | oui, clé du visiteur | oui, clé côté serveur |
+| Image d'une scène | non | oui | oui |
+| Réponse rédigée | non, des passages | oui | oui |
+| Recherche | plein texte, tout le corpus | le modèle propose puis vérifie | plein texte, tout le corpus |
+| Lectures du jour | oui | oui | oui |
+| Mise en route | rien | coller une clé | quatre commandes |
+
+---
+
+## Sources
+
+| Domaine | Sert à | Point d'entrée |
 |---|---|---|
-| Où elle tourne | GitHub Pages, sans aucun serveur | Votre machine, ou un hébergeur |
-| Clé API | fournie par le visiteur, gardée dans son navigateur | côté serveur, invisible du public |
-| Lecture d'AELF | par les serveurs d'Anthropic (`web_fetch`) | par le programme lui-même |
-| Recherche thématique | le modèle propose des passages, puis les vérifie | index plein texte sur tout le corpus |
-| Mise en route | rien à installer | quatre commandes |
-
-**La version page** est à l'adresse
-<https://sanctimaps-gif.github.io/Bible/>. Elle fonctionne sans rien installer :
-le visiteur colle sa propre clé Anthropic, qui reste dans son navigateur.
-
-Pourquoi la clé du visiteur, et pas la vôtre ? Parce qu'une page statique ne
-peut pas garder un secret : une clé placée dans le code serait lisible par tous
-et facturée sur votre compte. La seule clé qui puisse y figurer sans danger est
-celle de la personne qui s'en sert.
-
-Et pourquoi le navigateur peut-il lire AELF, alors que les règles inter-domaines
-l'interdisent normalement ? Parce qu'il ne le lit pas lui-même : les outils
-`web_fetch` et `web_search` s'exécutent sur les serveurs d'Anthropic, bridés aux
-deux domaines autorisés. La page ne fait que demander.
-
-**La version serveur** reste préférable pour un usage régulier : pas de clé à
-fournir, et surtout une vraie recherche plein texte sur l'ensemble du corpus.
+| `aelf.org` | Texte biblique et lectures de la messe | <https://www.aelf.org/2026-09-17/romain/messe> |
+| `sanctimaps.fr` | Questions sur les saints (versions IA seulement) | <https://sanctimaps.fr> |
 
 ---
 
@@ -162,13 +185,19 @@ Les événements SSE portent un champ `type` : `outil` (une recherche commence),
 
 ### GitHub Pages
 
-Rien à faire : `index.html` et `site/` sont servis tels quels depuis la branche.
-Le fichier `.nojekyll` empêche GitHub de retransformer le README en page.
+Rien à faire : `index.html` et `site/` sont servis tels quels depuis la branche,
+et `.nojekyll` empêche GitHub de retransformer le README en page.
 
-Ce qui ne peut pas y vivre, en revanche, c'est une clé API : elle serait lisible
-par tous les visiteurs. D'où le fonctionnement décrit plus haut — chacun apporte
-la sienne. Si vous voulez offrir l'assistant sans demander de clé, il faut un
-serveur : c'est l'objet de la section suivante.
+Le corpus, lui, est déposé par le workflow **Corpus AELF**. Il tourne chaque
+nuit pour les lectures du jour, et peut être lancé à la main depuis l'onglet
+Actions du dépôt. La première exécution est longue — 1 334 chapitres, une
+demi-seconde entre chaque requête par courtoisie pour AELF ; les suivantes ne
+font que rafraîchir.
+
+Une clé API, en revanche, ne peut pas vivre sur une page : elle serait lisible
+par tous les visiteurs. C'est pourquoi `assistant-ia.html` demande la sienne au
+visiteur, et pourquoi offrir l'IA sans rien demander suppose un serveur — objet
+de la section suivante.
 
 ### Avec Docker
 
@@ -270,8 +299,8 @@ pour diffuser en direct les recherches en cours et borner le nombre de tours
 ## Tests
 
 ```bash
-pytest        # version serveur — 105 tests
-npm test      # version page — 7 parcours dans un vrai navigateur
+pytest        # version serveur — 106 tests
+npm test      # les deux pages — 19 parcours dans un vrai navigateur
 ```
 
 Aucun accès réseau : les réponses d'AELF, de sanctimaps et de l'API Anthropic
@@ -281,11 +310,18 @@ Les tests Python couvrent l'analyse des références, l'index de recherche,
 l'extraction du HTML liturgique, le refus des domaines non autorisés, la boucle
 de dialogue et les routes HTTP.
 
-Les tests du navigateur chargent réellement `index.html` dans Chromium et
-interceptent les appels à `api.anthropic.com` pour y rejouer un flux
-d'événements identique à celui de l'API. Ils vérifient l'analyse du flux, la
-boucle d'outils, le renvoi des blocs de réflexion avec leur signature, l'envoi
-des images, les en-têtes et les messages d'erreur.
+Les tests du navigateur chargent réellement les pages dans Chromium.
+
+Pour `index.html` (12 parcours) : les lectures du jour, la recherche et ses
+familles de mots, le filtre par testament, la lecture suivie, le passage d'un
+résultat à son chapitre, et le comportement quand le corpus manque. L'un d'eux
+vérifie qu'**aucune requête ne sort du site**.
+
+Pour `assistant-ia.html` (7 parcours) : les appels à `api.anthropic.com` sont
+interceptés et un flux d'événements identique à celui de l'API y est rejoué.
+Sont vérifiés l'analyse du flux, la boucle d'outils, le renvoi des blocs de
+réflexion avec leur signature, l'envoi des images, les en-têtes et les messages
+d'erreur.
 
 ```bash
 npm run capture   # relit le rendu en clair et en sombre, sans clé

@@ -26,7 +26,7 @@ const TYPES = {
 
 function servir() {
   const serveur = createServer(async (requete, reponse) => {
-    const chemin = requete.url === "/" ? "/index.html" : requete.url.split("?")[0];
+    const chemin = requete.url === "/" ? "/assistant-ia.html" : requete.url.split("?")[0];
     const fichier = join(RACINE, normalize(chemin).replace(/^(\.\.[/\\])+/, ""));
     try {
       const contenu = await readFile(fichier);

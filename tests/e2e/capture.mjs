@@ -69,7 +69,7 @@ const TOUR_REPONSE = sse([
 ]);
 
 const serveur = createServer(async (requete, reponse) => {
-  const chemin = requete.url === "/" ? "/index.html" : requete.url.split("?")[0];
+  const chemin = requete.url === "/" ? "/assistant-ia.html" : requete.url.split("?")[0];
   try {
     const contenu = await readFile(join(RACINE, normalize(chemin).replace(/^(\.\.[/\\])+/, "")));
     reponse.writeHead(200, { "content-type": TYPES[extname(chemin)] || "text/plain" });

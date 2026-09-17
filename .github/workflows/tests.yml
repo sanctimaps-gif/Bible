@@ -42,7 +42,11 @@ jobs:
       - name: Installer Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Parcours de bout en bout
-        # La page est chargée dans un vrai navigateur ; l'API Anthropic est
-        # simulée, aucune clé n'est nécessaire.
-        run: npm test
+      - name: Parcours de la page principale
+        # Chargée dans un vrai navigateur, avec un corpus de démonstration.
+        # Rien ne sort du site : le test le vérifie explicitement.
+        run: npm run test:statique
+
+      - name: Parcours de la page assistant
+        # L'API Anthropic est simulée ; aucune clé n'est nécessaire.
+        run: npm run test:ia

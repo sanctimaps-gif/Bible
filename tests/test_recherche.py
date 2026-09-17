@@ -91,3 +91,27 @@ def test_conversion_en_dictionnaire(index):
     assert donnees["reference"] == "Ep 4, 25"
     assert donnees["testament"] == "nouveau"
     assert donnees["url"].startswith("https://www.aelf.org/bible/Ep/4")
+
+
+def test_mots_vides_identiques_en_javascript():
+    """La recherche du navigateur doit employer exactement les mêmes mots vides.
+
+    Deux implémentations, un seul comportement : si l'une des listes change
+    sans l'autre, les résultats divergeraient en silence.
+    """
+    import re
+    from pathlib import Path
+
+    from app.corpus.recherche import MOTS_VIDES
+
+    source = (Path(__file__).resolve().parent.parent / "site" / "recherche.js").read_text(
+        encoding="utf-8"
+    )
+    bloc = re.search(r"MOTS_VIDES = new Set\(\s*`([^`]*)`", source)
+    assert bloc, "Liste des mots vides introuvable dans site/recherche.js"
+
+    cote_js = set(bloc.group(1).split())
+    assert cote_js == set(MOTS_VIDES), {
+        "seulement en Python": sorted(set(MOTS_VIDES) - cote_js),
+        "seulement en JavaScript": sorted(cote_js - set(MOTS_VIDES)),
+    }

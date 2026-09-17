@@ -9,6 +9,7 @@
   --alerte-fond: #fdf6e8;
   --alerte-trait: #c9a227;
   --erreur: #9d2c2c;
+  --marque: #f6e6a8;
   --rayon: 12px;
 }
 
@@ -24,6 +25,7 @@
     --alerte-fond: #2a2314;
     --alerte-trait: #a88a2e;
     --erreur: #e58d8d;
+    --marque: #5a4a1c;
   }
 }
 
@@ -31,7 +33,7 @@
 
 body {
   margin: 0;
-  padding: 0 0 200px;
+  padding: 0 0 60px;
   background: var(--fond);
   color: var(--texte);
   font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -44,14 +46,13 @@ body {
 
 a { color: var(--accent); }
 
-header { padding: 44px 0 22px; border-bottom: 1px solid var(--trait); margin-bottom: 24px; }
+header { padding: 36px 0 0; border-bottom: 1px solid var(--trait); margin-bottom: 26px; }
 h1 { margin: 0 0 8px; font-size: 1.9rem; letter-spacing: -0.02em; line-height: 1.15; }
-.chapeau { margin: 0; color: var(--doux); font-size: 1rem; }
+.chapeau { margin: 0 0 18px; color: var(--doux); font-size: 0.98rem; }
 
-h2 {
-  font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.09em;
-  color: var(--doux); margin: 34px 0 12px; font-weight: 600;
-}
+.fine { font-size: 0.85rem; color: var(--doux); }
+.patiente { color: var(--doux); font-style: italic; }
+.vide { color: var(--doux); }
 
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -59,7 +60,151 @@ code {
   padding: 2px 6px; border-radius: 5px;
 }
 
-/* --- Clé d'accès --------------------------------------------------------- */
+mark { background: var(--marque); color: inherit; border-radius: 3px; padding: 0 1px; }
+
+/* --- Onglets ------------------------------------------------------------- */
+
+.onglets { display: flex; gap: 4px; }
+
+.onglet {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--doux); cursor: pointer; font: inherit; font-size: 0.95rem;
+  padding: 10px 14px; margin-bottom: -1px;
+}
+.onglet:hover { color: var(--texte); }
+.onglet.actif { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* --- Lectures du jour ---------------------------------------------------- */
+
+.barre-jour {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+}
+.barre-jour > div { flex: 1; text-align: center; }
+.barre-jour h2 { margin: 0; font-size: 1.15rem; line-height: 1.3; }
+.barre-jour p { margin: 2px 0 0; }
+
+.barre-jour button {
+  background: var(--carte); border: 1px solid var(--trait); border-radius: 50%;
+  color: var(--texte); cursor: pointer; font-size: 1.2rem; line-height: 1;
+  width: 38px; height: 38px; flex: none;
+}
+.barre-jour button:hover { border-color: var(--accent); color: var(--accent); }
+
+.couleur { margin: 0 0 18px; text-align: center; font-style: italic; }
+
+.lecture {
+  background: var(--carte); border: 1px solid var(--trait);
+  border-radius: var(--rayon); padding: 18px 20px; margin-bottom: 14px;
+}
+.lecture h3 {
+  margin: 0 0 4px; font-size: 0.78rem; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--accent);
+}
+.lecture .reference { margin: 0 0 8px; font-size: 0.9rem; color: var(--doux); }
+.lecture .titre-lecture { margin: 0 0 12px; font-style: italic; }
+.lecture .refrain {
+  margin: 0 0 12px; padding-left: 12px; border-left: 2px solid var(--accent);
+  font-weight: 600;
+}
+.texte-lecture { white-space: pre-wrap; }
+
+a.source {
+  display: inline-block; margin-top: 10px;
+  font-size: 0.85rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* --- Recherche ----------------------------------------------------------- */
+
+#formulaire-recherche { display: flex; gap: 8px; margin-bottom: 14px; }
+
+#champ-recherche {
+  flex: 1; min-width: 0;
+  background: var(--carte); border: 1px solid var(--trait); border-radius: 9px;
+  color: var(--texte); font: inherit; padding: 11px 14px;
+}
+#champ-recherche:focus { outline: none; border-color: var(--accent); }
+
+#formulaire-recherche button {
+  background: var(--accent); border: none; border-radius: 9px; color: var(--fond);
+  cursor: pointer; font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem; padding: 11px 20px;
+}
+
+.filtres {
+  display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 16px;
+  font-size: 0.88rem; color: var(--doux);
+}
+.filtres label { cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+.astuce { color: var(--doux); font-size: 0.85rem; margin: 0 0 18px; }
+
+.suggestions h3 {
+  font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.09em;
+  color: var(--doux); margin: 0 0 10px; font-weight: 600;
+}
+.pastilles { display: flex; flex-wrap: wrap; gap: 8px; }
+.pastille {
+  background: var(--carte); border: 1px solid var(--trait); border-radius: 999px;
+  color: var(--texte); cursor: pointer; font: inherit; font-size: 0.88rem;
+  padding: 6px 14px;
+}
+.pastille:hover { border-color: var(--accent); color: var(--accent); }
+
+.compte { color: var(--doux); font-size: 0.9rem; margin: 0 0 16px; }
+
+.resultat {
+  border-top: 1px solid var(--trait);
+  padding: 14px 0 12px;
+}
+.resultat .reference {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem; text-decoration: none; font-weight: 600;
+}
+.resultat .nom-livre { color: var(--doux); font-size: 0.85rem; margin-left: 8px; }
+.verset { margin: 6px 0 8px; }
+
+/* --- Lecture suivie ------------------------------------------------------ */
+
+.selecteurs { display: flex; gap: 8px; margin-bottom: 20px; }
+.selecteurs label { flex: 1; min-width: 0; }
+
+select {
+  width: 100%;
+  background: var(--carte); border: 1px solid var(--trait); border-radius: 9px;
+  color: var(--texte); font: inherit; font-size: 0.95rem; padding: 10px 12px;
+}
+
+#chapitre-contenu h2 { margin: 0 0 16px; font-size: 1.2rem; }
+
+.verset-numerote { margin: 0 0 10px; }
+.verset-numerote.vise { background: var(--marque); border-radius: 6px; padding: 4px 8px; margin-left: -8px; }
+.numero {
+  color: var(--accent); font-size: 0.72rem; font-weight: 700;
+  vertical-align: super; margin-right: 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* --- Pied ---------------------------------------------------------------- */
+
+footer {
+  margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--trait);
+}
+footer p { margin: 0 0 8px; }
+
+.lien-bouton {
+  background: none; border: none; color: var(--accent);
+  cursor: pointer; font: inherit; font-size: 0.85rem; padding: 0;
+  text-decoration: underline;
+}
+
+.sr {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* =========================================================================
+   Page « assistant IA » (assistant-ia.html)
+   ========================================================================= */
 
 .encart {
   background: var(--alerte-fond);
@@ -68,32 +213,21 @@ code {
   border-radius: 0 var(--rayon) var(--rayon) 0;
   padding: 20px 22px;
 }
-
-.encart h2 { margin-top: 0; }
+.encart h2 { margin-top: 0; text-transform: none; letter-spacing: 0; font-size: 1.1rem; color: var(--texte); }
 .encart p { margin: 0 0 12px; }
-.fine { font-size: 0.88rem; color: var(--doux); }
 
 #formulaire-cle { display: flex; gap: 8px; margin: 0 0 14px; flex-wrap: wrap; }
-
 #champ-cle {
-  flex: 1 1 220px;
-  min-width: 0;
-  border: 1px solid var(--trait);
-  border-radius: 9px;
-  background: var(--carte);
-  color: var(--texte);
-  font: inherit;
-  font-size: 0.95rem;
-  padding: 10px 12px;
+  flex: 1 1 220px; min-width: 0;
+  border: 1px solid var(--trait); border-radius: 9px;
+  background: var(--carte); color: var(--texte);
+  font: inherit; font-size: 0.95rem; padding: 10px 12px;
 }
-
 #formulaire-cle button {
   background: var(--accent); border: none; border-radius: 9px; color: var(--fond);
   cursor: pointer; font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.95rem; padding: 10px 20px;
 }
-
-/* --- Conversation -------------------------------------------------------- */
 
 .echange { margin: 26px auto; }
 
@@ -101,11 +235,8 @@ code {
   background: var(--accent-clair);
   border-left: 3px solid var(--accent);
   border-radius: 0 var(--rayon) var(--rayon) 0;
-  padding: 12px 16px;
-  margin-bottom: 14px;
-  white-space: pre-wrap;
+  padding: 12px 16px; margin-bottom: 14px; white-space: pre-wrap;
 }
-
 .question img {
   display: block; max-width: 260px; max-height: 260px;
   margin-top: 10px; border-radius: 8px;
@@ -115,10 +246,8 @@ code {
   margin: 0 0 14px; padding: 10px 14px;
   background: var(--carte); border: 1px solid var(--trait); border-radius: var(--rayon);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.78rem; color: var(--doux);
-  overflow-wrap: anywhere;
+  font-size: 0.78rem; color: var(--doux); overflow-wrap: anywhere;
 }
-
 .etapes div { padding: 2px 0; }
 .etapes .lien { padding-left: 14px; }
 
@@ -133,24 +262,14 @@ code {
 .reponse a { overflow-wrap: anywhere; }
 
 .erreur {
-  color: var(--erreur);
-  border-left: 3px solid var(--erreur);
-  padding-left: 12px;
-  margin: 12px 0 0;
+  color: var(--erreur); border-left: 3px solid var(--erreur);
+  padding-left: 12px; margin: 12px 0 0;
 }
 
-.curseur::after {
-  content: "▌"; animation: clignote 1s steps(2) infinite; color: var(--accent);
-}
+.curseur::after { content: "▌"; animation: clignote 1s steps(2) infinite; color: var(--accent); }
 @keyframes clignote { 50% { opacity: 0; } }
 
-/* --- Exemples ------------------------------------------------------------ */
-
-#exemples ul {
-  list-style: none; margin: 0; padding: 0;
-  display: flex; flex-wrap: wrap; gap: 8px;
-}
-
+#exemples ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .exemple {
   background: var(--carte); border: 1px solid var(--trait); border-radius: 999px;
   color: var(--texte); cursor: pointer; font: inherit; font-size: 0.88rem;
@@ -158,21 +277,15 @@ code {
 }
 .exemple:hover { border-color: var(--accent); color: var(--accent); }
 
-.astuce { color: var(--doux); font-size: 0.85rem; margin: 12px 0 0; }
-
-/* --- Barre de saisie ----------------------------------------------------- */
-
 #formulaire {
   position: fixed; left: 0; right: 0; bottom: 0;
   padding: 12px 0 10px;
   background: linear-gradient(to bottom, transparent, var(--fond) 22%);
 }
-
 #formulaire .ligne {
   max-width: 720px; margin: 0 auto; display: flex; gap: 8px; align-items: flex-end;
   background: var(--carte); border: 1px solid var(--trait);
-  border-radius: var(--rayon); padding: 8px;
-  width: calc(100% - 32px);
+  border-radius: var(--rayon); padding: 8px; width: calc(100% - 32px);
 }
 
 textarea {
@@ -188,10 +301,7 @@ textarea {
 }
 #envoyer:disabled { opacity: 0.5; cursor: progress; }
 
-.joindre {
-  cursor: pointer; font-size: 1.2rem; padding: 6px 8px;
-  border-radius: 8px; line-height: 1;
-}
+.joindre { cursor: pointer; font-size: 1.2rem; padding: 6px 8px; border-radius: 8px; line-height: 1; }
 .joindre:hover { background: var(--accent-clair); }
 
 .apercu { position: relative; width: fit-content; margin-bottom: 8px; }
@@ -209,15 +319,12 @@ textarea {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-.lien-bouton {
-  background: none; border: none; color: var(--accent);
-  cursor: pointer; font: inherit; padding: 0; text-decoration: underline;
-}
-
-/* --- Présentation -------------------------------------------------------- */
-
 .presentation { margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--trait); }
 .presentation p { margin: 0 0 13px; }
+.presentation h2 {
+  font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.09em;
+  color: var(--doux); margin: 34px 0 12px; font-weight: 600;
+}
 
 .bouton {
   display: inline-block; background: var(--accent); color: var(--fond);
@@ -228,9 +335,4 @@ textarea {
 .presentation footer {
   margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--trait);
   color: var(--doux); font-size: 0.85rem;
-}
-
-.sr {
-  position: absolute; width: 1px; height: 1px;
-  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
