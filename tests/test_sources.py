@@ -320,3 +320,58 @@ def test_sanctimaps_refuse_les_liens_sortants(cfg):
         client.chercher("Martin")
 
     assert all("wikipedia" not in url for url in vus)
+
+
+def test_le_sommaire_des_chapitres_n_est_pas_pris_pour_un_verset():
+    """Régression : AELF place un sommaire « chapitre 1, 2, 3… » à côté du texte.
+
+    Il était absorbé comme un verset, numéroté d'après le chapitre courant, et
+    écrasait alors le vrai verset de ce numéro.
+    """
+    html = """
+    <body class="front_bible_chapter">
+      <div id="content" class="container">
+        <div class="row">
+          <div class="col-md-3 col-sm-9">
+            <div class="block-summary">
+              <a href="/bible/Jon/1" class="active">chapitre 1</a>
+              <a href="/bible/Jon/2">chapitre 2</a>
+              <a href="/bible/Jon/3">chapitre 3</a>
+              <a href="/bible/Jon/4">chapitre 4</a>
+            </div>
+          </div>
+          <div class="col-md-7 col-sm-9 container-reading">
+            <div id="right-col" class="block-single-reading">
+              <p><sup>1</sup>Parole du Seigneur adressée à Jonas.</p>
+              <p><sup>2</sup>Lève-toi, va à Ninive, la grande ville.</p>
+              <p><sup>3</sup>Jonas se leva, mais pour s'enfuir à Tarsis.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+    """
+    versets = _extraire_versets(html)
+
+    assert [numero for numero, _ in versets] == [1, 2, 3]
+    assert versets[0][1] == "Parole du Seigneur adressée à Jonas."
+    assert all("chapitre" not in texte for _, texte in versets)
+
+
+def test_les_menus_ne_polluent_pas_le_texte():
+    html = """
+    <body>
+      <header><a href="/">L'AELF</a><a href="/abonner">S'abonner</a></header>
+      <nav><a href="/calendrier">Calendrier</a></nav>
+      <div id="right-col" class="block-single-reading">
+        <p><sup>1</sup>Au commencement, Dieu créa le ciel et la terre.</p>
+        <p><sup>2</sup>La terre était informe et vide.</p>
+      </div>
+      <footer><a href="/contact">Contact</a></footer>
+    </body>
+    """
+    versets = _extraire_versets(html)
+    assert versets == [
+        (1, "Au commencement, Dieu créa le ciel et la terre."),
+        (2, "La terre était informe et vide."),
+    ]

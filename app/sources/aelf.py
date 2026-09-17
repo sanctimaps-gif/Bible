@@ -282,19 +282,56 @@ def _extraire_versets(html: str) -> list[tuple[int, str]]:
     Trois stratégies, de la plus structurée à la plus tolérante. La première qui
     donne un résultat crédible gagne.
     """
-    soupe = BeautifulSoup(html, "lxml")
     for strategie in (_versets_par_classe, _versets_par_numero_en_tete, _versets_par_paragraphe):
-        versets = strategie(soupe)
+        # Chaque stratégie repart d'une analyse neuve : elles retirent des
+        # nœuds au passage, et travailler sur un arbre déjà entamé fausserait
+        # la suivante.
+        versets = strategie(BeautifulSoup(html, "lxml"))
         if len(versets) >= 2:
             return versets
     return []
 
 
+# Zones à écarter avant toute extraction. La première est la plus importante :
+# `block-summary` est le sommaire des chapitres d'AELF (« chapitre 1 »,
+# « chapitre 2 »…). Sans cette exclusion, il est pris pour un verset, dont le
+# numéro est celui du chapitre courant — et il écrase alors le vrai verset.
+_ZONES_HORS_TEXTE = (
+    ".block-summary",
+    "nav",
+    "header",
+    "footer",
+    ".menu-secondary-mobile",
+    ".social",
+    ".links",
+    "script",
+    "style",
+)
+
+# Zones de contenu, de la plus précise à la plus large. Les deux premières sont
+# celles qu'AELF emploie réellement pour le texte biblique.
+_ZONES_DE_TEXTE = (
+    "div#right-col.block-single-reading",
+    "div.block-single-reading",
+    "div.container-reading",
+    "div.bible-content",
+    "div#contenu",
+    "article",
+    "main",
+    "div#content",
+    "div.content",
+)
+
+
 def _conteneur_principal(soupe: BeautifulSoup):
-    """Isole la zone de contenu pour éviter d'aspirer menus et pieds de page."""
-    for selecteur in ("div.bible-content", "div#contenu", "article", "main", "div.content"):
+    """Isole la zone du texte, débarrassée du sommaire et des menus."""
+    for selecteur in _ZONES_HORS_TEXTE:
+        for indesirable in soupe.select(selecteur):
+            indesirable.decompose()
+
+    for selecteur in _ZONES_DE_TEXTE:
         zone = soupe.select_one(selecteur)
-        if zone is not None:
+        if zone is not None and zone.get_text(strip=True):
             return zone
     return soupe
 
