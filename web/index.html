@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assistant biblique</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Assistant biblique</h1>
+  <p class="sous-titre">
+    Toutes les réponses sont tirées de
+    <a href="https://www.aelf.org" target="_blank" rel="noopener">aelf.org</a>
+    pour l'Écriture, et de
+    <a href="https://sanctimaps.fr" target="_blank" rel="noopener">sanctimaps.fr</a>
+    pour les saints.
+  </p>
+  <p id="etat" class="etat" role="status"></p>
+</header>
+
+<main id="conversation" aria-live="polite"></main>
+
+<section class="exemples" id="exemples">
+  <h2>Exemples de questions</h2>
+  <ul>
+    <li><button type="button" class="exemple">Raconte-moi l'histoire du prophète Jonas.</button></li>
+    <li><button type="button" class="exemple">Que dit le Nouveau Testament sur la tromperie ?</button></li>
+    <li><button type="button" class="exemple">Quelles sont les lectures de la messe aujourd'hui ?</button></li>
+    <li><button type="button" class="exemple">Qui est saint Martin de Tours ?</button></li>
+  </ul>
+  <p class="astuce">Vous pouvez aussi joindre l'image d'une scène biblique : elle sera identifiée à partir du texte.</p>
+</section>
+
+<form id="formulaire">
+  <div class="apercu" id="apercu" hidden>
+    <img id="apercu-image" alt="Image jointe">
+    <button type="button" id="retirer-image" aria-label="Retirer l'image">×</button>
+  </div>
+  <div class="ligne">
+    <label class="joindre" for="image" title="Joindre une image">
+      <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+      <span aria-hidden="true">🖼</span>
+      <span class="sr">Joindre une image</span>
+    </label>
+    <textarea id="question" name="texte" rows="1" placeholder="Posez votre question…" required></textarea>
+    <button type="submit" id="envoyer">Envoyer</button>
+  </div>
+</form>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

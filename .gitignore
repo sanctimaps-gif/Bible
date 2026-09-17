@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+
+# Corpus et cache téléchargés depuis AELF (regénérables via scripts/ingerer_bible.py)
+data/bible/
+data/cache/
+data/index/
