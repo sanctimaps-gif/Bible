@@ -42,3 +42,12 @@ jobs:
         with:
           name: rapport-aelf
           path: rapport.txt
+
+      # En dernier, et volontairement : c'est la fin du journal qu'on lit en
+      # premier quand on revient voir ce qu'a donné le diagnostic.
+      - name: Ce que l'extraction en tire
+        if: always()
+        run: |
+          echo '================= RÉSULTAT ================='
+          grep -E "^https|Extraction actuelle|^  [0-9]+\. " rapport.txt || true
+          echo '============================================'
