@@ -338,12 +338,14 @@ npm run capture   # relit le rendu en clair et en sombre, sans clé
   couvert par deux tests. Si AELF change sa mise en page, `_extraire_versets`
   dans `app/sources/aelf.py` est le seul endroit à reprendre, et le workflow
   **Diagnostic AELF** décrit la nouvelle structure depuis GitHub.
-* **Trois chapitres sur 1 334 manquent** à l'appel chez AELF, aux endroits où
-  la numérotation liturgique diverge : les psaumes 9 et 113 (que les
-  numérotations hébraïque et grecque découpent différemment) et Baruch 6 (la
-  lettre de Jérémie). Le livre d'Abdias n'est pas servi sous le code `Ab`. Ces
-  livres apparaissent simplement incomplets dans la liste : la page n'affiche
-  que ce qu'elle a.
+* **1 324 chapitres sur 1 334** sont présents. Manquent les psaumes 9 et 113,
+  là où les numérotations hébraïque et grecque découpent différemment, et
+  Baruch 6 (la lettre de Jérémie) ; le livre d'Abdias n'est servi ni sous le
+  code `Ab` ni sous `Abd`. Ces livres apparaissent simplement incomplets dans
+  la liste : la page n'affiche que ce qu'elle a.
+* **64 psaumes commencent au verset 2**, et c'est normal : leur verset 1 est le
+  titre (« Psaume de David, quand il fuyait devant Absalom »), qu'AELF ne
+  compte pas dans le corps du texte. La page est fidèle à sa source.
 * **L'extraction de sanctimaps.fr (`_texte_principal`) n'a pas été vérifiée**
   contre le site réel : elle ne sert que dans les versions à IA.
 * **Les codes de livres** (`Gn`, `Rm`, `1Co`…) suivent les abréviations
