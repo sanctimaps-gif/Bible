@@ -53,14 +53,23 @@ jobs:
           path: data/bible
           # Le numéro de version est à incrémenter quand l'extraction change :
           # il écarte un corpus produit par l'ancienne version du code.
-          key: corpus-aelf-v2-${{ github.run_id }}
-          restore-keys: corpus-aelf-v2-
+          key: corpus-aelf-v3-${{ github.run_id }}
+          restore-keys: corpus-aelf-v3-
 
       - name: Télécharger les chapitres depuis AELF
+        env:
+          # Le passage par l'environnement évite les surprises de conversion :
+          # une entrée booléenne arrive en chaîne quand le workflow est lancé
+          # par l'API, et « chaîne == true » est faux dans une expression.
+          FORCER: ${{ inputs.forcer }}
+          LIVRES: ${{ inputs.livres }}
         run: |
-          python scripts/ingerer_bible.py \
-            ${{ inputs.forcer == true && '--forcer' || '' }} \
-            ${{ inputs.livres }}
+          arguments=""
+          if [ "$FORCER" = "true" ]; then
+            arguments="--forcer"
+            echo "Retéléchargement forcé de tous les chapitres."
+          fi
+          python scripts/ingerer_bible.py $arguments $LIVRES
 
       - name: Préparer les fichiers lus par la page
         # Les lectures des sept prochains jours, pour que la page reste juste
