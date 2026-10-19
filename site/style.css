@@ -106,7 +106,17 @@ mark { background: var(--marque); color: inherit; border-radius: 3px; padding: 0
   margin: 0 0 12px; padding-left: 12px; border-left: 2px solid var(--accent);
   font-weight: 600;
 }
-.texte-lecture { white-space: pre-wrap; }
+.texte-lecture { white-space: pre-wrap; line-height: 1.5; }
+
+.choix-jour {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 8px; margin: -8px 0 18px; font-size: 0.9rem; color: var(--doux);
+}
+.choix-jour input, .choix-jour button {
+  background: var(--carte); border: 1px solid var(--trait); border-radius: 9px;
+  color: var(--texte); font: inherit; padding: 4px 10px; cursor: pointer;
+}
+.choix-jour button:hover { border-color: var(--accent); color: var(--accent); }
 
 a.source {
   display: inline-block; margin-top: 10px;

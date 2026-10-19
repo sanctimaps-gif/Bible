@@ -22,6 +22,8 @@ const elements = {
   messeContenu: document.getElementById("messe-contenu"),
   jourPrecedent: document.getElementById("jour-precedent"),
   jourSuivant: document.getElementById("jour-suivant"),
+  messeChoix: document.getElementById("messe-choix"),
+  jourAujourdhui: document.getElementById("jour-aujourdhui"),
   formulaireRecherche: document.getElementById("formulaire-recherche"),
   champRecherche: document.getElementById("champ-recherche"),
   resultats: document.getElementById("resultats"),
@@ -125,9 +127,21 @@ const TITRES_LECTURE = {
   sequence: "Séquence",
 };
 
+// AELF sépare chaque ligne du texte par une ligne vide : on n'en garde
+// qu'un simple retour à la ligne, sinon la lecture s'étire sur des pages.
+function compacter(texte) {
+  return texte
+    .split(/\n+/)
+    .map((ligne) => ligne.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
 async function afficherMesse() {
   const date = iso(etat.jour);
   elements.messeDate.textContent = enFrancais(etat.jour);
+  elements.messeChoix.value = date;
+  elements.jourAujourdhui.hidden = date === iso(new Date());
   message(elements.messeContenu, "Chargement…");
 
   let messe;
@@ -190,7 +204,7 @@ async function afficherMesse() {
 
     const corps = document.createElement("div");
     corps.className = "texte-lecture";
-    corps.textContent = lecture.texte;
+    corps.textContent = compacter(lecture.texte);
     article.appendChild(corps);
 
     elements.messeContenu.appendChild(article);
@@ -208,6 +222,18 @@ function decalerJour(jours) {
 
 elements.jourPrecedent.addEventListener("click", () => decalerJour(-1));
 elements.jourSuivant.addEventListener("click", () => decalerJour(1));
+
+elements.messeChoix.addEventListener("change", () => {
+  const [annee, mois, jour] = elements.messeChoix.value.split("-").map(Number);
+  if (!annee) return;
+  etat.jour = new Date(annee, mois - 1, jour);
+  afficherMesse();
+});
+
+elements.jourAujourdhui.addEventListener("click", () => {
+  etat.jour = new Date();
+  afficherMesse();
+});
 
 // ---------------------------------------------------------------------------
 // Recherche
@@ -456,6 +482,11 @@ async function demarrer() {
     etat.datesMesse = await lireJson("messe/index.json");
   } catch {
     etat.datesMesse = [];
+  }
+
+  if (etat.datesMesse.length) {
+    elements.messeChoix.min = etat.datesMesse[0];
+    elements.messeChoix.max = etat.datesMesse[etat.datesMesse.length - 1];
   }
 
   const livresPrets = etat.catalogue.filter((livre) => livre.disponibles.length).length;
